@@ -1,4 +1,4 @@
-### 使用
+## 使用
 
 ```bash
 # 技能安装
@@ -15,9 +15,48 @@ npx hyperframes preview
 npx hyperframes render --output output.mp4
 ```
 
+### 官方标准
+
+HyperFrames 工程标准结构
+
+>一个 project = 一个根 index.html 主视频 + 一个 compositions/ 目录可放多个子视频。
+
+```
+my-video/                       ← 一个 HyperFrames project
+  ├── index.html                ← 主 composition（入口视频），必备
+  ├── hyperframes.json          ← 工程配置，必备
+  ├── meta.json                 ← 元数据（id/name/createdAt）
+  ├── package.json              ← npm scripts: dev / check / render / publish
+  ├── AGENTS.md / CLAUDE.md     ← 给 AI agent 的说明（可选）
+  ├── compositions/             ← 子 composition / registry blocks 存放处
+  │   └── components/           ← 复用组件
+  └── assets/                   ← 媒体资源（视频/音频/图片）
+```
+
+`一个视频一个 project 文件夹(每个文件夹自己的 index.html)`
+
+```
+每个视频一个独立 project:
+
+  01_科普系列/
+  ├── 什么是AI/              ← npx hyperframes init 创建
+  │   ├── index.html
+  │   ├── hyperframes.json
+  │   └── ...
+  └── 什么是量子计算/
+      ├── index.html
+      └── ...
+```
+
+### 测试
+
 ```
 /hyperframes 做一个`什么是agent?`的教学视频 @什么是agent.md
 ```
+
+---
+
+## 常见问题
 
 ### 渲染报错：`An executablePath or channel must be specified for puppeteer-core`
 
