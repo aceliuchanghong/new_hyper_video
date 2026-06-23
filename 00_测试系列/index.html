@@ -1,36 +1,314 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1920, height=1080">
-    <title>Decision Tree</title>
+    <title>什么�� Agent?</title>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        margin: 0;
-        width: 1920px;
-        height: 1080px;
-        overflow: hidden;
-        background: #ffffff;
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden;
+        background: #0B1020;
         font-family: "Inter", sans-serif;
+        color: #E6EDF3;
+        -webkit-font-smoothing: antialiased;
       }
+      :root {
+        --bg: #0B1020;
+        --bg-elev: #121A2E;
+        --ink: #E6EDF3;
+        --ink-dim: #8B98A9;
+        --accent: #3DD9B0;
+        --accent-2: #5BB8FF;
+        --warn: #F0A35E;
+        --line: #1E2940;
+      }
+      .mono { font-family: "Consolas", "Menlo", monospace; }
+      .scene {
+        position: absolute; top: 0; left: 0;
+        width: 1920px; height: 1080px; overflow: hidden;
+        background:
+          radial-gradient(1100px 700px at 78% 22%, rgba(61,217,176,0.10), transparent 65%),
+          radial-gradient(900px 600px at 18% 85%, rgba(91,184,255,0.07), transparent 60%),
+          #0B1020;
+      }
+      #scene1 { z-index: 1; }
+      #scene2 { z-index: 2; opacity: 0; }
+      #scene3 { z-index: 3; opacity: 0; }
+      #scene4 { z-index: 4; opacity: 0; }
+      #scene5 { z-index: 5; opacity: 0; }
+      #scene6 { z-index: 6; opacity: 0; }
+      #scene7 { z-index: 7; opacity: 0; }
+
+      .content {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        justify-content: center; align-items: flex-start;
+        padding: 96px 140px; gap: 28px;
+      }
+      .kicker {
+        font-family: monospace;
+        font-size: 22px; letter-spacing: 0.32em; text-transform: uppercase;
+        color: var(--accent); font-weight: 500;
+      }
+      .title-xl { font-size: 150px; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; }
+      .title-lg { font-size: 92px; font-weight: 700; line-height: 1.08; letter-spacing: -0.01em; }
+      .lead { font-size: 34px; line-height: 1.5; font-weight: 400; color: var(--ink); max-width: 1500px; }
+      .lead-dim { color: var(--ink-dim); }
+      .accent { color: var(--accent); }
+      .accent2 { color: var(--accent-2); }
+      .warn { color: var(--warn); }
+      .cursor { display: inline-block; width: 0.55em; height: 1em; background: var(--accent); margin-left: 10px; vertical-align: -0.12em; transform-origin: left center; }
+
+      /* code / panel blocks */
+      .panel {
+        background: var(--bg-elev);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 40px 52px;
+        font-family: monospace;
+      }
+      .panel-head { color: var(--ink-dim); font-size: 18px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 22px; display: flex; align-items: center; gap: 12px; }
+      .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+
+      .formula { font-family: monospace; font-size: 76px; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
+      .row { display: flex; align-items: baseline; gap: 22px; font-size: 30px; line-height: 1.45; }
+      .tag { font-family: monospace; font-size: 24px; font-weight: 600; color: var(--accent); min-width: 180px; }
+      .tag2 { color: var(--accent-2); }
+      .desc { color: var(--ink-dim); }
+
+      /* loop diagram */
+      .loop-wrap { position: relative; width: 1300px; height: 560px; margin: 20px 0; }
+      .node {
+        position: absolute; background: var(--bg-elev); border: 1px solid var(--line);
+        border-radius: 14px; padding: 22px 30px;
+        font-family: monospace; font-size: 26px; font-weight: 600;
+        display: flex; align-items: center; gap: 14px; white-space: nowrap;
+      }
+      .node .badge { font-size: 18px; color: var(--ink-dim); font-weight: 400; }
+      .node.accent-node { border-color: var(--accent); box-shadow: 0 0 40px rgba(61,217,176,0.22); color: var(--accent); }
+      .node.branch { border-color: var(--warn); color: var(--warn); }
+
+      .foot-mark { position: absolute; left: 140px; bottom: 70px; font-family: monospace; font-size: 18px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-dim); }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=block" rel="stylesheet">
   </head>
   <body>
-    <div data-hf-id="hf-kbh8" id="root" data-composition-id="main" data-start="0" data-duration="15" data-width="1920" data-height="1080">
-      <div data-hf-id="hf-nt0w" id="decision-tree-comp" data-composition-id="decision-tree" data-composition-src="compositions/decision_tree.html" data-start="0" data-duration="15" data-track-index="0" data-width="1920" data-height="1080"></div>
+    <div data-hf-id="hf-xn63" id="root" data-composition-id="main" data-width="1920" data-height="1080" data-start="0" data-duration="52">
+
+      <!-- ===== Scene 1: Title ===== -->
+      <div data-hf-id="hf-zet7" id="scene1" class="scene">
+        <div data-hf-id="hf-mcm7" class="content">
+          <div data-hf-id="hf-tzta" class="kicker" id="s1-kicker">// 第 01 节 · 定义</div>
+          <div data-hf-id="hf-kial" class="title-xl" id="s1-title">什么是 Agent?</div>
+          <div data-hf-id="hf-r330" class="lead" id="s1-sub">在目标驱动下，<span data-hf-id="hf-jcch" class="accent">自主感知、决策、行动</span>的<span data-hf-id="hf-kcqt" class="accent">闭环系统</span>。<span data-hf-id="hf-uls8" class="cursor" id="s1-cursor"></span></div>
+        </div>
+        <div data-hf-id="hf-owaw" class="foot-mark" id="s1-foot">model · harness · loop</div>
+      </div>
+
+      <!-- ===== Scene 2: Definition ===== -->
+      <div data-hf-id="hf-qqxc" id="scene2" class="scene">
+        <div data-hf-id="hf-i7rz" class="content">
+          <div data-hf-id="hf-tsrj" class="kicker" id="s2-kicker">// 定义</div>
+          <div data-hf-id="hf-n8l6" class="panel" id="s2-panel" style="max-width: 1500px;">
+            <div data-hf-id="hf-cwmr" class="panel-head"><span data-hf-id="hf-2rg2" class="dot" style="background:var(--accent)"></span> CORE DEFINITION</div>
+            <div data-hf-id="hf-c36j" id="s2-body" style="font-size:46px; line-height:1.5; font-weight:400;">
+              Agent 是一个能在<span data-hf-id="hf-kaup" class="accent">环境</span>中根据<span data-hf-id="hf-ezxw" class="accent">目标</span>自主选择行动，并根据行动<span data-hf-id="hf-qp02" class="accent">反馈</span>继续调整下一步行为的<span data-hf-id="hf-vwm1" class="accent">闭环系统</span>。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Scene 3: Formula ===== -->
+      <div data-hf-id="hf-ril5" id="scene3" class="scene">
+        <div data-hf-id="hf-htgy" class="content">
+          <div data-hf-id="hf-ahzi" class="kicker" id="s3-kicker">// 一句话工程定义</div>
+          <div data-hf-id="hf-uf8k" class="formula" id="s3-formula">
+            <span data-hf-id="hf-igjg" class="accent">Agent</span> = <span data-hf-id="hf-mrx8" class="accent2">Model</span> + <span data-hf-id="hf-l2vd" class="accent">Harness</span> + <span data-hf-id="hf-dz85" class="accent2">Loop</span>
+          </div>
+          <div data-hf-id="hf-kugx" style="display:flex; flex-direction:column; gap:18px; margin-top:18px;" id="s3-rows">
+            <div data-hf-id="hf-thy4" class="row"><span data-hf-id="hf-b4f0" class="tag">Model</span><span data-hf-id="hf-6f7b" class="desc">负责判断下一步做什么</span></div>
+            <div data-hf-id="hf-lt04" class="row"><span data-hf-id="hf-ti0p" class="tag tag2">Harness</span><span data-hf-id="hf-y8bu" class="desc">让模型能看见环境、调用工具、执行动作</span></div>
+            <div data-hf-id="hf-km31" class="row"><span data-hf-id="hf-cafp" class="tag">Loop</span><span data-hf-id="hf-di82" class="desc">把反馈送回模型，直到任务完成</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Scene 4: Workflow != Agent ===== -->
+      <div data-hf-id="hf-gn3i" id="scene4" class="scene">
+        <div data-hf-id="hf-hf5x" class="content">
+          <div data-hf-id="hf-d6ae" class="kicker warn" id="s4-kicker" style="color:var(--warn)">// 常见误解</div>
+          <div data-hf-id="hf-4nto" class="title-lg" id="s4-title">流程写死的，是 <span data-hf-id="hf-5j08" class="warn">workflow</span>，<br data-hf-id="hf-x5px">不是 Agent。</div>
+          <div data-hf-id="hf-pehe" class="panel" id="s4-panel" style="max-width:1500px;">
+            <div data-hf-id="hf-ue0g" class="panel-head"><span data-hf-id="hf-a9uk" class="dot" style="background:var(--warn)"></span> 硬编码流水线</div>
+            <div data-hf-id="hf-2926" class="mono" id="s4-flow" style="font-size:30px; line-height:1.7; color:var(--ink-dim);">
+              用户输入 → 分类 → <span data-hf-id="hf-3k84" style="color:var(--ink)">固定分支</span> → <span data-hf-id="hf-vrzn" style="color:var(--ink)">固定工具</span> → <span data-hf-id="hf-v8mb" style="color:var(--ink)">固定格式输出</span>
+            </div>
+          </div>
+          <div data-hf-id="hf-ubp7" class="lead lead-dim" id="s4-note" style="font-size:30px;">核心决策来自<span data-hf-id="hf-ndll" class="warn">代码</span>，而非模型在环境反馈中<span data-hf-id="hf-7s2y" class="accent">自主选择</span>。</div>
+        </div>
+      </div>
+
+      <!-- ===== Scene 5: Harness breakdown ===== -->
+      <div data-hf-id="hf-kl7j" id="scene5" class="scene">
+        <div data-hf-id="hf-k7b4" class="content">
+          <div data-hf-id="hf-j4d4" class="kicker" id="s5-kicker">// Agent 的身体</div>
+          <div data-hf-id="hf-78xx" class="title-lg" id="s5-title">Harness <span data-hf-id="hf-qpfu" class="lead-dim" style="font-size:48px;">= 模型能行动的环境</span></div>
+          <div data-hf-id="hf-gh2u" style="display:grid; grid-template-columns:1fr 1fr; gap:22px 60px; margin-top:14px; max-width:1500px;" id="s5-grid">
+            <div data-hf-id="hf-l0e2" class="row"><span data-hf-id="hf-4k9q" class="tag">Tools</span><span data-hf-id="hf-cedq" class="desc">文件 · Shell · 网络 · 浏览器</span></div>
+            <div data-hf-id="hf-mzx7" class="row"><span data-hf-id="hf-6u79" class="tag tag2">Knowledge</span><span data-hf-id="hf-vgt1" class="desc">文档 · API 规范 · 风格指南</span></div>
+            <div data-hf-id="hf-ne88" class="row"><span data-hf-id="hf-0t7b" class="tag">Observation</span><span data-hf-id="hf-ct6y" class="desc">git diff · 日志 · 状态</span></div>
+            <div data-hf-id="hf-m7b5" class="row"><span data-hf-id="hf-3k1p" class="tag tag2">Action</span><span data-hf-id="hf-t8do" class="desc">CLI · API · UI 交互</span></div>
+            <div data-hf-id="hf-mlm6" class="row"><span data-hf-id="hf-fjxl" class="tag">Permissions</span><span data-hf-id="hf-wpz9" class="desc">沙箱 · 审批 · 信任边界</span></div>
+            <div data-hf-id="hf-ol5b" class="row"><span data-hf-id="hf-7f0n" class="desc" style="font-style:italic;">模型提供智能，Harness 提供身体。</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Scene 6: Agent Loop ===== -->
+      <div data-hf-id="hf-bxbo" id="scene6" class="scene">
+        <div data-hf-id="hf-1it7" class="content" style="align-items:center;">
+          <div data-hf-id="hf-esww" class="kicker" id="s6-kicker" style="align-self:flex-start;">// 最小闭环</div>
+          <div data-hf-id="hf-1kth" class="loop-wrap" id="s6-loop">
+            <!-- nodes -->
+            <div data-hf-id="hf-fgwx" class="node" id="n-user" style="top:0; left:0;">User<span data-hf-id="hf-98yw" class="badge">→ messages[]</span></div>
+            <div data-hf-id="hf-e7sd" class="node accent-node" id="n-llm" style="top:0; left:520px;">LLM</div>
+            <div data-hf-id="hf-xbon" class="node" id="n-resp" style="top:0; left:900px;">response</div>
+            <div data-hf-id="hf-zlf4" class="node branch" id="n-check" style="top:210px; left:760px;">tool_use ?</div>
+            <div data-hf-id="hf-kv76" class="node" id="n-exec" style="top:210px; left:1080px;">execute tools</div>
+            <div data-hf-id="hf-2922" class="node" id="n-ret" style="top:210px; left:200px;">return text</div>
+            <!-- arrows (svg) -->
+            <svg data-hf-id="hf-caic" id="s6-edges" width="1300" height="560" style="position:absolute; inset:0; overflow:visible; pointer-events:none;">
+              <defs data-hf-id="hf-mh0t">
+                <marker data-hf-id="hf-z85n" id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path data-hf-id="hf-ipha" d="M0,0 L8,3 L0,6 Z" fill="#8B98A9" />
+                </marker>
+                <marker data-hf-id="hf-mifm" id="ahA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path data-hf-id="hf-yp7j" d="M0,0 L8,3 L0,6 Z" fill="#3DD9B0" />
+                </marker>
+              </defs>
+              <g data-hf-id="hf-p02r" stroke="#8B98A9" stroke-width="3" fill="none">
+                <path data-hf-id="hf-0z4n" id="e1" d="M340,42 C420,42 440,42 520,42" marker-end="url(#ah)" />
+                <path data-hf-id="hf-rmbs" id="e2" d="M760,84 C820,84 840,84 900,84" marker-end="url(#ah)" />
+                <path data-hf-id="hf-p493" id="e3" d="M1040,110 C1040,160 940,170 900,210" marker-end="url(#ah)" />
+                <path data-hf-id="hf-7tbp" id="e5" d="M760,260 C660,260 520,260 420,260" marker-end="url(#ah)" />
+              </g>
+              <g data-hf-id="hf-mzlo" stroke="#3DD9B0" stroke-width="3" fill="none" id="eLoopG">
+                <path data-hf-id="hf-f5ft" id="eLoop" d="M1080,300 C760,420 420,420 340,300 C260,220 260,140 340,90" marker-end="url(#ahA)" stroke-dasharray="0 0" />
+              </g>
+            </svg>
+            <div data-hf-id="hf-bqzg" id="s6-label" class="mono" style="position:absolute; top:300px; left:600px; color:var(--accent); font-size:22px; opacity:0;">loop back → messages[]</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Scene 7: Resolve ===== -->
+      <div data-hf-id="hf-cozh" id="scene7" class="scene">
+        <div data-hf-id="hf-jt03" class="content">
+          <div data-hf-id="hf-uztr" class="kicker" id="s7-kicker">// 这才是 Agent</div>
+          <div data-hf-id="hf-fvdz" class="mono" id="s7-list" style="font-size:40px; line-height:1.7; font-weight:500;">
+            <div data-hf-id="hf-bgdg">它能<span data-hf-id="hf-m1hr" class="accent">看见</span>环境。</div>
+            <div data-hf-id="hf-nk0v">它能理解<span data-hf-id="hf-t85o" class="accent">目标</span>。</div>
+            <div data-hf-id="hf-vm0o">它能<span data-hf-id="hf-7vu1" class="accent">选择</span>并<span data-hf-id="hf-xnrg" class="accent2">执行</span>动作。</div>
+            <div data-hf-id="hf-k5oi">它能观察<span data-hf-id="hf-2bme" class="accent">反馈</span>并继续调整。</div>
+            <div data-hf-id="hf-yly0" style="margin-top:28px;">直到任务完成。<span data-hf-id="hf-sxgm" class="cursor" id="s7-cursor"></span></div>
+          </div>
+        </div>
+        <div data-hf-id="hf-pw20" class="foot-mark" id="s7-foot">agent = model + harness + loop</div>
+      </div>
+
     </div>
 
     <script>
       window.__timelines = window.__timelines || {};
-      const tl = gsap.timeline({ paused: true });
+      var tl = gsap.timeline({ paused: true });
+
+      // ---- helpers ----
+      function blurIn(sceneSel, els, start) {
+        // entrance for incoming scene elements (used right after a reveal)
+        tl.from(els, { y: 40, filter: "blur(14px)", opacity: 0, duration: 0.6, ease: "expo.out", stagger: 0.12 }, start);
+      }
+      // exit: blur out + drift up (velocity-matched to next entrance)
+      function blurOut(sceneSel, start) {
+        tl.to(sceneSel + " .content > *", { y: -60, filter: "blur(16px)", opacity: 0, duration: 0.4, ease: "power2.in", stagger: 0.04 }, start);
+      }
+      function reveal(sceneId, start) {
+        // incoming scene: fade + slight scale-in, content re-enters via blurIn
+        tl.to("#" + sceneId, { opacity: 1, duration: 0.5, ease: "power2.out", overwrite: "auto" }, start);
+      }
+
+      /* ============ SCENE 1: Title (0 - 6.2s) ============ */
+      tl.from("#s1-kicker", { x: -30, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2);
+      tl.from("#s1-title", { y: 70, opacity: 0, filter: "blur(18px)", duration: 0.9, ease: "expo.out" }, 0.45);
+      tl.from("#s1-sub", { y: 30, opacity: 0, duration: 0.7, ease: "power3.out" }, 1.15);
+      tl.from("#s1-foot", { opacity: 0, duration: 0.6 }, 1.5);
+      // cursor blink (finite, deterministic): on 0.5s, off 0.5s, repeat computed
+      var blinkRepeats = 3; // ends at 1.4 + 3*1.0 + 0.5 = 4.9s, before scene exit at 5.7s
+      tl.to("#s1-cursor", { opacity: 0, duration: 0.5, ease: "none", repeat: blinkRepeats, yoyo: true }, 1.4);
+
+      /* transition 1 -> 2 at 6.2 */
+      blurOut("#scene1", 5.7);
+      reveal("scene2", 6.0);
+      blurIn("#scene2", ["#s2-kicker", "#s2-panel"], 6.1);
+
+      /* ============ SCENE 2: Definition (6.2 - 14.8s) ============ */
+      // highlight the 4 accent spans in sequence
+      tl.from("#s2-body .accent", { color: "#E6EDF3", duration: 0.4, ease: "none", stagger: 0.55 }, 7.4);
+      // hold
+
+      /* transition 2 -> 3 at 14.8 */
+      blurOut("#scene2", 14.3);
+      reveal("scene3", 14.6);
+      blurIn("#scene3", ["#s3-kicker", "#s3-formula", "#s3-rows .row"], 14.7);
+
+      /* ============ SCENE 3: Formula (14.8 - 23.2s) ============ */
+      // rows cascade already via blurIn stagger; add a subtle pulse on the operators
+      tl.fromTo("#s3-formula", { scale: 0.96 }, { scale: 1, duration: 0.7, ease: "expo.out" }, 14.7);
+
+      /* transition 3 -> 4 at 23.2 */
+      blurOut("#scene3", 22.7);
+      reveal("scene4", 23.0);
+      blurIn("#scene4", ["#s4-kicker", "#s4-title", "#s4-panel", "#s4-note"], 23.1);
+
+      /* ============ SCENE 4: Workflow != Agent (23.2 - 31.6s) ============ */
+      // strike-through effect: emphasize "workflow" word with a scale pop
+      tl.fromTo("#s4-title .warn", { scale: 1 }, { scale: 1.08, duration: 0.35, ease: "back.out(3)", yoyo: true, repeat: 1 }, 24.6);
+      // flow arrow segments light up
+      tl.from("#s4-flow span", { opacity: 0.25, duration: 0.4, ease: "none", stagger: 0.3 }, 25.4);
+
+      /* transition 4 -> 5 at 31.6 */
+      blurOut("#scene4", 31.1);
+      reveal("scene5", 31.4);
+      blurIn("#scene5", ["#s5-kicker", "#s5-title", "#s5-grid .row"], 31.5);
+
+      /* ============ SCENE 5: Harness (31.6 - 39.6s) ============ */
+
+      /* transition 5 -> 6 at 39.6 */
+      blurOut("#scene5", 39.1);
+      reveal("scene6", 39.4);
+      blurIn("#scene6", ["#s6-kicker", "#s6-loop"], 39.5);
+
+      /* ============ SCENE 6: Agent Loop (39.6 - 46.6s) ============ */
+      tl.from("#s6-loop .node", { scale: 0.8, opacity: 0, duration: 0.5, ease: "back.out(1.6)", stagger: 0.18 }, 40.0);
+      tl.from("#s6-edges path", { opacity: 0, duration: 0.4, ease: "none", stagger: 0.25 }, 40.5);
+      // the loop-back arrow draws on last, with a label
+      var eLoopLen = document.getElementById("eLoop").getTotalLength();
+      tl.fromTo("#eLoop",
+        { strokeDasharray: eLoopLen + " " + eLoopLen, strokeDashoffset: eLoopLen },
+        { strokeDashoffset: 0, duration: 1.1, ease: "power1.inOut" }, 41.6);
+      tl.to("#s6-label", { opacity: 1, duration: 0.5, ease: "power2.out" }, 42.4);
+      // pulse the LLM node to show it's alive
+      tl.to("#n-llm", { boxShadow: "0 0 70px rgba(61,217,176,0.45)", duration: 0.5, ease: "sine.inOut", yoyo: true, repeat: 3 }, 43.0);
+
+      /* transition 6 -> 7 at 46.6 */
+      blurOut("#scene6", 46.1);
+      reveal("scene7", 46.4);
+      blurIn("#scene7", ["#s7-kicker", "#s7-list > div"], 46.5);
+
+      /* ============ SCENE 7: Resolve (46.6 - 52s) ============ */
+      var blinkRepeats2 = 1; // 49.6 + 2*1.0 + 0.5 = 52.1s, matches duration
+      tl.to("#s7-cursor", { opacity: 0, duration: 0.5, ease: "none", repeat: blinkRepeats2, yoyo: true }, 49.6);
+
       window.__timelines["main"] = tl;
     </script>
   </body>
